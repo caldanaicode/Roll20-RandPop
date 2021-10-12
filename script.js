@@ -169,9 +169,9 @@ var randPop = randPop || (function() {
             imgsrc: imgsrc
         }
         
-        for (var i = 0; i < props.length; i++) {
-            newToken[props[i]] = token.get(props[i]);
-        }
+        props.forEach(prop => {
+            newToken[prop] = token.get(prop);
+        });
         
         return createObj("graphic",newToken);
     }
