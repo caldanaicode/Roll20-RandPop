@@ -122,6 +122,7 @@ var randPop = randPop || (function() {
             let top = token.get("top") + unitsToPixels(pos.y) * pixelsToUnits(tokenSize);
             available.splice(index, 1);
             let newToken = cloneTokenToPosition(token, left, top);
+            newToken.set("name", newToken.get("name") + ` ${i + 1}`);
             for(var j = 0; j < formulae.length; j++) {
                 var parts = formulae[j].split('|');
                 sendChat('', '/r ' + parts[1], ops => {
