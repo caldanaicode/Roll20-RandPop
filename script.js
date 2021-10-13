@@ -16,7 +16,7 @@ on("ready", function() {
             if (line.length > 4) {
                 for(var i = 4; i < line.length; i++) {
                     var parts = line[i].split('|');
-                    if (parts.length == 2 && ((parts[0] == 'bar1') || parts[0] == 'bar2' ||parts[0] == 'bar3')) {
+                    if (parts.length == 2 && ((parts[0] == 'bar1') || parts[0] == 'bar2' || parts[0] == 'bar3')) {
                         formulae.push(line[i]);
                     }
                     else {
@@ -43,7 +43,7 @@ var randPop = randPop || (function() {
     }
     
     function respond(message) {
-        sendChat("Random Population", "/w gm " + message, null, {noarchive: true});
+        sendChat("Random Population", `/w gm ${message}`, null, {noarchive: true});
     }
     
     function ch(c) {
@@ -67,7 +67,7 @@ var randPop = randPop || (function() {
             return c.split('').map(x => ch(x)).join('');
         }
         else if(c in entities) {
-            return ('&' + entities[c] + ';');
+            return (`&${entities[c]};`);
         }
         
         return '';
@@ -98,7 +98,6 @@ var randPop = randPop || (function() {
         xShift = Math.abs(xShift);
         yShift = Math.abs(yShift);
         
-        
         if((xShift * 2 + 1) * (yShift * 2 + 1) < count + 1) {
             respond("There is not enough space for the number of duplicates.");
             return;
@@ -125,10 +124,10 @@ var randPop = randPop || (function() {
             newToken.set("name", newToken.get("name") + ` ${i + 1}`);
             for(var j = 0; j < formulae.length; j++) {
                 var parts = formulae[j].split('|');
-                sendChat('', '/r ' + parts[1], ops => {
+                sendChat('', `/r ${parts[1]}`, ops => {
                     var hp = JSON.parse(ops[0].content).total;
-                    newToken.set(parts[0] + "_value", hp);
-                    newToken.set(parts[0] + "_max", hp);
+                    newToken.set(`${parts[0]}_value`, hp);
+                    newToken.set(`${parts[0]}_max`, hp);
                 }, {noarchive: true});
             }
         }
@@ -140,7 +139,8 @@ var randPop = randPop || (function() {
             imgsrc += '?'
         }
         
-        var props = [ "name", "controlledby", "represents", "width", "height", "rotation",
+        var props = [
+            "name", "controlledby", "represents", "width", "height", "rotation",
             "_pageid", "statusmarkers", "layer", "gmnotes", "tint_color", "showname",
             "light_radius", "light_dimradius", "light_otherplayers", "light_hassight",
             "light_angle", "light_losangle", "light_multiplier", "has_bright_light_vision",
@@ -150,17 +150,17 @@ var randPop = randPop || (function() {
         ];
         
         for (var i = 1; i < 4; i++) {
-            props.push("bar" + i + "_value");
-            props.push("bar" + i + "_max");
-            props.push("bar" + i + "_link");
-            props.push("showplayers_bar" + i);
-            props.push("playersedit_bar" + i);
+            props.push(`bar${i}_value`);
+            props.push(`bar${i}_max`);
+            props.push(`bar${i}_link`);
+            props.push(`showplayers_bar${i}`);
+            props.push(`playersedit_bar${i}`);
             if (i < 3) {
-                props.push("aura" + i + "_radius");
-                props.push("aura" + i + "_color");
-                props.push("aura" + i + "_square");
-                props.push("showplayers_aura" + i);
-                props.push("playersedit_aura" + i);
+                props.push(`aura${i}_radius`);
+                props.push(`aura${i}_color`);
+                props.push(`aura${i}_square`);
+                props.push(`showplayers_aura${i}`);
+                props.push(`playersedit_aura${i}`);
             }
         }
         
@@ -174,7 +174,7 @@ var randPop = randPop || (function() {
             newToken[prop] = token.get(prop);
         });
         
-        return createObj("graphic",newToken);
+        return createObj("graphic", newToken);
     }
     
     return {
