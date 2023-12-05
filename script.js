@@ -1,21 +1,21 @@
 on("ready", function() {
     on("chat:message", msg => {
         if(msg.type == 'api' && msg.content.indexOf('!randpop') == 0 && playerIsGM(msg.playerid)) {
-            var line = msg.content.split(' ');
+            let line = msg.content.split(' ');
             if(line.length == 1) {
                 randPop.showHelp();
                 return;
             }
             
-            var token = msg.selected != undefined ? getObj("graphic", msg.selected[0]._id) || null : null;
-            var count = parseInt(line[1]) || 0;
-            var areaX = parseInt(line[2]) || 0;
-            var areaY = parseInt(line[3]) || 0;
+            let token = msg.selected != undefined ? getObj("graphic", msg.selected[0]._id) || null : null;
+            let count = parseInt(line[1]) || 0;
+            let areaX = parseInt(line[2]) || 0;
+            let areaY = parseInt(line[3]) || 0;
             
-            var formulae = []
+            let formulae = []
             if (line.length > 4) {
-                for(var i = 4; i < line.length; i++) {
-                    var parts = line[i].split('|');
+                for(let i = 4; i < line.length; i++) {
+                    let parts = line[i].split('|');
                     if (parts.length == 2 && ((parts[0] == 'bar1') || parts[0] == 'bar2' || parts[0] == 'bar3')) {
                         formulae.push(line[i]);
                     }
@@ -29,6 +29,7 @@ on("ready", function() {
             randPop.duplicateToken(token, count, areaX, areaY, formulae);
         }
     });
+    log("(>^-^)> Random Population started! <(^-^<)");
 });
 
 var randPop = randPop || (function() {
@@ -84,62 +85,14 @@ var randPop = randPop || (function() {
         );
     }
     
-    function duplicateToken(token, count, xShift, yShift, formulae) {
-        if(token === null) {
-            respond("No token selected.");
-            return;
-        }
-        
-        if(count <= 0) {
-            respond("Count must be greater than 0");
-            return;
-        }
-        
-        xShift = Math.abs(xShift);
-        yShift = Math.abs(yShift);
-        
-        if((xShift * 2 + 1) * (yShift * 2 + 1) < count + 1) {
-            respond("There is not enough space for the number of duplicates.");
-            return;
-        }
-        
-        var tokenSize = Math.max(token.get("width"), token.get("height"));
-        
-        var available = []
-        for(var x = -xShift; x <= xShift; x++) {
-            for(var y = -yShift; y <= yShift; y++) {
-                if(x == 0 && y == 0)
-                    continue;
-                available.push({x: x, y: y});
-            }
-        }
-    
-        for(var i = 0; i < count; i++) {
-            let index = randomInteger(available.length) - 1;
-            let pos = available[index];
-            let left = token.get("left") + unitsToPixels(pos.x) * pixelsToUnits(tokenSize);
-            let top = token.get("top") + unitsToPixels(pos.y) * pixelsToUnits(tokenSize);
-            available.splice(index, 1);
-            let newToken = cloneTokenToPosition(token, left, top);
-            newToken.set("name", newToken.get("name") + ` ${i + 1}`);
-            for(var j = 0; j < formulae.length; j++) {
-                var parts = formulae[j].split('|');
-                sendChat('', `/r ${parts[1]}`, ops => {
-                    var hp = JSON.parse(ops[0].content).total;
-                    newToken.set(`${parts[0]}_value`, hp);
-                    newToken.set(`${parts[0]}_max`, hp);
-                }, {noarchive: true});
-            }
-        }
-    }
-    
     function cloneTokenToPosition(token, left, top) {
-        var imgsrc = token.get("imgsrc").replace("original", "thumb").replace("max", "thumb");
+        const regex = /(original|max|med)\./g;
+        let imgsrc = token.get("imgsrc").replace(regex, "thumb.");
         if (imgsrc.indexOf('?') == -1) {
             imgsrc += '?'
         }
         
-        var props = [
+        let props = [
             "name", "controlledby", "represents", "width", "height", "rotation",
             "_pageid", "statusmarkers", "layer", "gmnotes", "tint_color", "showname",
             "light_radius", "light_dimradius", "light_otherplayers", "light_hassight",
@@ -164,7 +117,7 @@ var randPop = randPop || (function() {
             }
         }
         
-        var newToken = {
+        let newToken = {
             top: top,
             left: left,
             imgsrc: imgsrc
@@ -175,6 +128,59 @@ var randPop = randPop || (function() {
         });
         
         return createObj("graphic", newToken);
+    }
+    
+    function duplicateToken(token, count, xShift, yShift, formulae) {
+        if(token === null || token === undefined) {
+            respond("No token selected.");
+            return;
+        }
+        
+        if(count <= 0) {
+            respond("Count must be greater than 0");
+            return;
+        }
+        
+        xShift = Math.abs(xShift);
+        yShift = Math.abs(yShift);
+        
+        if((xShift * 2 + 1) * (yShift * 2 + 1) < count + 1) {
+            respond("There is not enough space for the number of duplicates.");
+            return;
+        }
+        
+        const tokenSize = Math.max(token.get("width"), token.get("height"));
+        
+        let available = []
+        for(let x = -xShift; x <= xShift; x++) {
+            for(let y = -yShift; y <= yShift; y++) {
+                if(x == 0 && y == 0)
+                    continue;
+                available.push({x: x, y: y});
+            }
+        }
+    
+        for(let i = 0; i < count; i++) {
+            let index = randomInteger(available.length) - 1;
+            let pos = available[index];
+            let left = token.get("left") + unitsToPixels(pos.x) * pixelsToUnits(tokenSize);
+            let top = token.get("top") + unitsToPixels(pos.y) * pixelsToUnits(tokenSize);
+            available.splice(index, 1);
+            let newToken = cloneTokenToPosition(token, left, top);
+            if (newToken === undefined || newToken === null) {
+                log(`<(O_o)> Randpop failed to cloneTokenToPosition(${token}, ${left}, ${top})`);
+            } else {
+                newToken.set("name", newToken.get("name") + ` ${i + 1}`);
+                for(let j = 0; j < formulae.length; j++) {
+                    let parts = formulae[j].split('|');
+                    sendChat('', `/r ${parts[1]}`, ops => {
+                        let hp = JSON.parse(ops[0].content).total;
+                        newToken.set(`${parts[0]}_value`, hp);
+                        newToken.set(`${parts[0]}_max`, hp);
+                    }, {noarchive: true});
+                }    
+            }
+        }
     }
     
     return {
